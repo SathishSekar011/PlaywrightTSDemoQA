@@ -1,4 +1,5 @@
 import {test, expect} from '../pages/PageFixture';
+import { readCSV } from '../utils/csvReader';
 
 test('@Smoke add book to collection', async({page, request, basePage, homePage, loginPage, registerPage, profilePage, booksPage })=>{
     test.setTimeout(60000);
@@ -22,8 +23,12 @@ test('@Smoke add book to collection', async({page, request, basePage, homePage, 
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(5000);
     await booksPage.clickBookStoreButton();
-    await booksPage.selectBook('Git Pocket Guide', "Learning JavaScript Design Patterns");
+
+    let testData = await readCSV(`${process.env.TEST_SUITE?.toLocaleLowerCase()}_data.csv`);
+    let bookNames = testData.map((data) => data.title);
+    console.log(bookNames);
+    await booksPage.selectBook(...bookNames);
     await profilePage.clickProfile();
-    expect(await profilePage.getBooksInCollection()).toEqual(expect.arrayContaining(['Git Pocket Guide', "Learning JavaScript Design Patterns"]));
+    expect(await profilePage.getBooksInCollection()).toEqual(expect.arrayContaining(bookNames));
 
 });
